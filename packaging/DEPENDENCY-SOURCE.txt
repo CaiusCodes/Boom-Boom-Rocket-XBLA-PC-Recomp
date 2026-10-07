@@ -1,0 +1,35 @@
+Matching runtime dependency source for Boom Boom Rocket XBLA PC Recomp v0.9.1
+=========================================================================
+
+This archive accompanies the portable binary release. FFmpeg (libavcodec and
+libavutil) and libmspack (LZX) are linked statically into rexruntime.dll.
+Their sources are under sdk-source/thirdparty/FFmpeg and libmspack. They are
+unmodified pinned upstream sources; CONFIG_GPL and CONFIG_NONFREE are 0 in
+the Windows FFmpeg configuration. See licenses/ for LGPL 2.1 and other notices.
+
+To rebuild/relink the native runtime with modified LGPL libraries, install Git,
+CMake 3.25+, Ninja, Clang 18+ and the Visual Studio C++ Build Tools/Windows SDK.
+In PowerShell from this extracted archive run:
+
+ ./tools/Build-Sdk.ps1 -SdkDirectory ./sdk-source
+
+No original game executable or assets are needed to rebuild these libraries
+or the SDK runtime. Modify the FFmpeg/libmspack source before rebuilding if
+desired. Copy the rebuilt rexruntime.dll, rexgpu-xenos.dll and TracyClient.dll
+from out/sdk-install/bin into your installed Game/resources folder, together.
+The project header/API patch uses GPU ABI 2; keep host and plugin versions matched.
+The executable's translated PPC code is separate from these SDK libraries.
+
+This source export is pinned to ReXGlue and the dependency commits recorded in
+DEPENDENCY-PINS.txt, with only the 20 reviewed project SDK patches applied.
+It contains the SDK build sources needed to recreate the runtime, not a copy of
+the shared development SDK/install directory. No personal Git configs, old
+backups, build output, game packages, extracted assets or generated game source
+are included. The .git/SOURCE-ARCHIVE markers are not repository databases.
+The GNU disassembler is a GPL development-tool dependency only, not linked into
+the distributed game runtime; its original notices and GPL text are retained.
+
+Publish this archive alongside the matching portable ZIP on the same download
+page. Do not distribute binaries without the corresponding library source.
+Library modification and reverse engineering for debugging those modifications
+are permitted under the included LGPL license. No project EULA restricts them.

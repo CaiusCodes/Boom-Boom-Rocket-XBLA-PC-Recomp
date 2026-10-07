@@ -1,0 +1,6 @@
+# Stable text and deterministic patch manifests across Windows checkouts.
+* text=auto eol=lf
+*.bat text eol=crlf
+patches/*.json text eol=lf
+*.png binary
+*.ico binary

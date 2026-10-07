@@ -1,0 +1,793 @@
+{
+  "schemaVersion": 1,
+  "sdkCommit": "3eb9b511b4140d2769e27be63eae57d41bfa2afa",
+  "files": [
+    {
+      "file": "include/rex/graphics/command_processor.h",
+      "rawSha256": "80BE95FC05A8AD75D4BAEE57C62DA4193813287B86B8149C862F4FCC0373FB5B",
+      "patchedSha256": "DC2E0A416F65D974D8B4C9434FF3FFD2FE54529E46EB0757C16769A32A2600CC",
+      "edits": [
+        {
+          "index": 88,
+          "remove": 0,
+          "insert": [
+            "",
+            "  // Game-frame count, safe to read from the UI thread.",
+            "  uint64_t guest_frame_count() const {",
+            "    return guest_frame_count_.load(std::memory_order_relaxed);",
+            "  }"
+          ]
+        },
+        {
+          "index": 98,
+          "remove": 0,
+          "insert": [
+            "  // Rebuild backend graphics state using the current configuration.",
+            "  // Must be called on the command processor worker thread.",
+            "  bool ReinitializeContext();",
+            ""
+          ]
+        },
+        {
+          "index": 272,
+          "remove": 0,
+          "insert": [
+            "  std::atomic<uint64_t> guest_frame_count_{0};"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "include/rex/graphics/graphics_system.h",
+      "rawSha256": "6B21FAC121D6CAE245E5E1858A1B70A3C835BC1B7146A9CE2E721F8EA2E1C7F6",
+      "patchedSha256": "167BEF1ED6FD7F0FA5881F31F96BD5F66ECC79A699B6DA03CF7462B78AE4044D",
+      "edits": [
+        {
+          "index": 72,
+          "remove": 0,
+          "insert": [
+            "  uint64_t guest_frame_count() const override;"
+          ]
+        },
+        {
+          "index": 82,
+          "remove": 0,
+          "insert": [
+            "  // Rebuild the graphics backend synchronously on the GPU worker thread.",
+            "  bool ReinitializeContext() override;",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "file": "include/rex/system/gpu_plugin.h",
+      "rawSha256": "B1F059C8CAC179FFD6E89CC91E9CDBB62061D10143B8A6604DE1395293FBBDE0",
+      "patchedSha256": "85F2E9527675EB5C5F31B21299310AA0639D4E609EE0933A3AF5CF660A9BB920",
+      "edits": [
+        {
+          "index": 31,
+          "remove": 1,
+          "insert": [
+            "inline constexpr uint32_t kGpuPluginAbiVersion = 2;"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "include/rex/system/interfaces/graphics.h",
+      "rawSha256": "648BE06BF6CF7CEF92DE566165D1A97288482AB814B83A2D0A74D257C2768564",
+      "patchedSha256": "E12D022201C5E3ABEC2C222F31E33952E518E8112A18A71B6F287CB82AE24464",
+      "edits": [
+        {
+          "index": 59,
+          "remove": 0,
+          "insert": [
+            "  // Number of guest swap/present packets processed. Backends without a",
+            "  // guest command processor may leave the default value of zero.",
+            "  virtual uint64_t guest_frame_count() const { return 0; }",
+            ""
+          ]
+        },
+        {
+          "index": 73,
+          "remove": 0,
+          "insert": [
+            "  // Rebuild backend graphics state using the current configuration.",
+            "  // Backends that don't support this may leave the default implementation.",
+            "  virtual bool ReinitializeContext() { return false; }"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "include/rex/rex_app.h",
+      "rawSha256": "3B5B447CCA544BF1FB1BD1CB54A61B861FE2C0B5C92C93F220FEC07AF95D524C",
+      "patchedSha256": "AF80BEDD49C14009BDF8BFE205D9364E585A6EA6B0D9A5BC1EEB0D90CEE07E69",
+      "edits": [
+        {
+          "index": 212,
+          "remove": 0,
+          "insert": [
+            "  /// Visible host window title.",
+            "  virtual std::string GetWindowTitle() const;",
+            ""
+          ]
+        },
+        {
+          "index": 251,
+          "remove": 0,
+          "insert": [
+            "  const std::filesystem::path& config_path() const { return config_path_; }"
+          ]
+        },
+        {
+          "index": 298,
+          "remove": 0,
+          "insert": [
+            "  std::unique_ptr<ui::FpsOverlayDialog> fps_overlay_;"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "include/rex/ppc/context.h",
+      "rawSha256": "115AF7D8FADEC3D9E07C2F6AC2EC129CD0E361B871B938972DA41850CDD56B00",
+      "patchedSha256": "9955840A504B57EF4EE3A0134A50A00AC356DD4EFCD24E54B1172C291FCD8B82",
+      "edits": [
+        {
+          "index": 198,
+          "remove": 0,
+          "insert": [
+            "    // Host FP exceptions must never actually trap: this recompiler does not",
+            "    // deliver a guest-visible FP exception interrupt, so re-assert the mask",
+            "    // in case something else running on this thread (a driver, a codec, an",
+            "    // SIMD builder for a saturating conversion) touched MXCSR/FPCR without",
+            "    // preserving it.",
+            "    Platform::InitHostExceptions(csr);",
+            "    setcsr(csr);"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "include/rex/ui/imgui_drawer.h",
+      "rawSha256": "E235E12296B83D039DAFAA065E315ADCF18DAE756A15851729C6EE96998A2CA8",
+      "patchedSha256": "3AAB92E158EC54E4F8CB4E8D8B5B6127CF7C29DCE4D3AA21E9FDC7B95C08270D",
+      "edits": [
+        {
+          "index": 14,
+          "remove": 0,
+          "insert": [
+            "#include <atomic>"
+          ]
+        },
+        {
+          "index": 60,
+          "remove": 0,
+          "insert": [
+            "  // Whether a modal popup (BeginPopupModal) was open as of the last-drawn",
+            "  // frame. Safe to call from any thread - backed by a plain atomic rather",
+            "  // than live ImGui state, since ImGui's context isn't thread-safe and this",
+            "  // is read from the input system's active-callback, which guest threads",
+            "  // can invoke concurrently with the UI thread's own Draw().",
+            "  bool HasOpenModalPopup() const { return has_open_modal_popup_.load(std::memory_order_relaxed); }",
+            ""
+          ]
+        },
+        {
+          "index": 121,
+          "remove": 0,
+          "insert": [
+            "",
+            "  std::atomic<bool> has_open_modal_popup_{false};"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "include/rex/ui/overlay/debug_overlay.h",
+      "rawSha256": "CFF6ACE7211DC0A4454AAAFA11E12BD313FA770CEA04EAB90C5780EE1F8E5D33",
+      "patchedSha256": "5BF4760D2A209247A7C3047D545813E2FBED2FC005E42005CE0727EE0BC01538",
+      "edits": [
+        {
+          "index": 46,
+          "remove": 0,
+          "insert": [
+            "class FpsOverlayDialog : public ImGuiDialog {",
+            " public:",
+            "  using FrameStatsProvider = DebugOverlayDialog::FrameStatsProvider;",
+            "",
+            "  explicit FpsOverlayDialog(ImGuiDrawer* imgui_drawer,",
+            "                            FrameStatsProvider stats_provider = {});",
+            "  ~FpsOverlayDialog();",
+            "",
+            "  void SetStatsProvider(FrameStatsProvider provider) {",
+            "    stats_provider_ = std::move(provider);",
+            "  }",
+            "",
+            " protected:",
+            "  void OnDraw(ImGuiIO& io) override;",
+            "",
+            " private:",
+            "  FrameStatsProvider stats_provider_;",
+            "};",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "file": "src/graphics/command_processor.cpp",
+      "rawSha256": "08EB7127374D639D05476E9CDA9751D70E93C295BE9F2169EEE53A56B00D1B55",
+      "patchedSha256": "060B68A6A2501783B3268E01728E7282562E6B5149E7A3B1DAB80B20AFF39FB3",
+      "edits": [
+        {
+          "index": 241,
+          "remove": 0,
+          "insert": [
+            "bool CommandProcessor::ReinitializeContext() {",
+            "  ShutdownContext();",
+            "  return SetupContext();",
+            "}",
+            ""
+          ]
+        },
+        {
+          "index": 1099,
+          "remove": 0,
+          "insert": [
+            "  guest_frame_count_.fetch_add(1, std::memory_order_relaxed);"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "src/kernel/xam/xam_info.cpp",
+      "rawSha256": "C847210DCEC0D2A3AD07E459BD59A7B4ACC38D8706187E597F398153A3D31981",
+      "patchedSha256": "C36DFA033F7966E8F1386BFDAD7031DE6831CD2CD2D3B46F2E3E21CD3EFC8702",
+      "edits": [
+        {
+          "index": 27,
+          "remove": 0,
+          "insert": [
+            "#include <cstdlib>",
+            ""
+          ]
+        },
+        {
+          "index": 291,
+          "remove": 2,
+          "insert": [
+            "  // Standalone recompilation: there is no Xbox dashboard to return to.",
+            "  // Flush logs and terminate the host process immediately.",
+            "  REXLOG_INFO(\"Title requested termination; exiting process.\");",
+            "  rex::FlushLogging();",
+            "  std::_Exit(0);"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "src/ui/d3d12/d3d12_provider.cpp",
+      "rawSha256": "B5D7B7EB02D495A343E3A1DF02D3AFF892294D501E859E99BC622C1B4CBE7D64",
+      "patchedSha256": "78FBFCDBE69D4A28B3583550F207DDAB954FC806D93DEAD10A602402575515E3",
+      "edits": [
+        {
+          "index": 463,
+          "remove": 2,
+          "insert": [
+            "  // attached. The function pointer itself is null whenever the DXGI debug",
+            "  // interface couldn't be loaded at all (e.g. no Graphics Tools feature",
+            "  // installed), which is a normal, non-fatal case - guard against it the",
+            "  // same way the destructor above does.",
+            "  if (pfn_dxgi_get_debug_interface1_) {",
+            "    pfn_dxgi_get_debug_interface1_(0, IID_PPV_ARGS(&graphics_analysis_));",
+            "  }"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "src/ui/imgui_drawer.cpp",
+      "rawSha256": "FAE0308854C9B8F89D12C308B4870EB762FBCB7009735D6E2ED64D57B4B3AFAE",
+      "patchedSha256": "B51CCDAE3ED801E678B54D887919F7703B8E618C140083E3385054A14E0ACDA8",
+      "edits": [
+        {
+          "index": 403,
+          "remove": 0,
+          "insert": [
+            "  // Snapshot popup state now, on the UI thread where ImGui's context is",
+            "  // valid to query, for HasOpenModalPopup() to hand to other threads safely.",
+            "  has_open_modal_popup_.store(",
+            "      ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel),",
+            "      std::memory_order_relaxed);",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "file": "src/ui/overlay/debug_overlay.cpp",
+      "rawSha256": "7696DF3D7BD8C032A88CF5CC2AF01EF359C13CF71C0CE9AD2AB8C28C43A078CB",
+      "patchedSha256": "E91B1D2DA70C0C3309AD3EC2D4A3BEC13231F77204B5B78E4ED3CB5CBA1A598D",
+      "edits": [
+        {
+          "index": 12,
+          "remove": 0,
+          "insert": [
+            "#include <rex/cvar.h>"
+          ]
+        },
+        {
+          "index": 19,
+          "remove": 0,
+          "insert": [
+            "REXCVAR_DEFINE_BOOL(show_fps, false, \"UI/Overlay\", \"Show FPS counter\");",
+            ""
+          ]
+        },
+        {
+          "index": 107,
+          "remove": 0,
+          "insert": [
+            "FpsOverlayDialog::FpsOverlayDialog(ImGuiDrawer* imgui_drawer,",
+            "                                   FrameStatsProvider stats_provider)",
+            "    : ImGuiDialog(imgui_drawer),",
+            "      stats_provider_(std::move(stats_provider)) {}",
+            "",
+            "FpsOverlayDialog::~FpsOverlayDialog() {}",
+            "",
+            "void FpsOverlayDialog::OnDraw(ImGuiIO& io) {",
+            "  if (!REXCVAR_GET(show_fps)) {",
+            "    return;",
+            "  }",
+            "",
+            "  if (!stats_provider_) {",
+            "    return;",
+            "  }",
+            "",
+            "  const auto stats = stats_provider_();",
+            "  if (stats.frame_count == 0 || stats.fps <= 0.0) {",
+            "    return;",
+            "  }",
+            "",
+            "  ImGui::SetNextWindowPos(",
+            "      ImVec2(io.DisplaySize.x - 10.0f, 10.0f),",
+            "      ImGuiCond_Always,",
+            "      ImVec2(1.0f, 0.0f));",
+            "",
+            "  ImGui::SetNextWindowBgAlpha(0.5f);",
+            "",
+            "  if (ImGui::Begin(",
+            "          \"##fps_overlay\",",
+            "          nullptr,",
+            "          ImGuiWindowFlags_NoDecoration |",
+            "              ImGuiWindowFlags_AlwaysAutoResize |",
+            "              ImGuiWindowFlags_NoSavedSettings |",
+            "              ImGuiWindowFlags_NoFocusOnAppearing |",
+            "              ImGuiWindowFlags_NoNav |",
+            "              ImGuiWindowFlags_NoInputs)) {",
+            "    ImGui::Text(\"%.1f FPS\", stats.fps);",
+            "  }",
+            "",
+            "  ImGui::End();",
+            "}",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "file": "src/ui/rex_app.cpp",
+      "rawSha256": "834065C5BD252B99422D77E89B5C936EFA6F2652244152E71BBF9721BEB5E814",
+      "patchedSha256": "BB3911C78F8B14CB3F835D3DAAF25C12D8FDAABD09ACB569FFEE8123CD76F224",
+      "edits": [
+        {
+          "index": 13,
+          "remove": 0,
+          "insert": [
+            "#include <chrono>"
+          ]
+        },
+        {
+          "index": 17,
+          "remove": 0,
+          "insert": [
+            "#include <rex/graphics/command_processor.h>",
+            "#include <rex/graphics/graphics_system.h>"
+          ]
+        },
+        {
+          "index": 241,
+          "remove": 0,
+          "insert": [
+            "  // Feed the overlays actual guest-present FPS rather than host UI FPS.",
+            "  {",
+            "    auto last_time = std::chrono::steady_clock::now();",
+            "    uint64_t last_frame_count = 0;",
+            "    double last_fps = 0.0;",
+            "",
+            "    SetGuestFrameStats(",
+            "        [this, last_time, last_frame_count, last_fps]() mutable {",
+            "          ui::FrameStats stats;",
+            "",
+            "          if (!runtime_) {",
+            "            return stats;",
+            "          }",
+            "",
+            "          auto* graphics_system = runtime_->graphics_system();",
+            "          if (!graphics_system) {",
+            "            return stats;",
+            "          }",
+            "",
+            "          const uint64_t frame_count =",
+            "              graphics_system->guest_frame_count();",
+            "          const auto now = std::chrono::steady_clock::now();",
+            "",
+            "          if (last_frame_count == 0) {",
+            "            last_frame_count = frame_count;",
+            "            last_time = now;",
+            "          }",
+            "",
+            "          const double elapsed_seconds =",
+            "              std::chrono::duration<double>(now - last_time).count();",
+            "",
+            "          if (elapsed_seconds >= 0.25) {",
+            "            const uint64_t frame_delta =",
+            "                frame_count - last_frame_count;",
+            "",
+            "            last_fps =",
+            "                static_cast<double>(frame_delta) / elapsed_seconds;",
+            "",
+            "            last_frame_count = frame_count;",
+            "            last_time = now;",
+            "          }",
+            "",
+            "          stats.frame_count = frame_count;",
+            "          stats.fps = last_fps;",
+            "          stats.frame_time_ms =",
+            "              last_fps > 0.0 ? 1000.0 / last_fps : 0.0;",
+            "",
+            "          return stats;",
+            "        });",
+            "  }",
+            ""
+          ]
+        },
+        {
+          "index": 253,
+          "remove": 0,
+          "insert": [
+            "        // A modal ImGui popup (BeginPopupModal) is exclusive by definition -",
+            "        // block guest input unconditionally while one is open, regardless of",
+            "        // mouse position. This covers app-added dialogs the base ReXApp has",
+            "        // no member flag for (e.g. a title's own settings dialog), not just",
+            "        // the four named overlays below. Queried via a plain atomic snapshot",
+            "        // (not live ImGui state) because this callback runs on whichever",
+            "        // guest thread calls XamInputGetState, concurrently with the UI",
+            "        // thread's own ImGui frame - ImGui's context isn't thread-safe.",
+            "        if (imgui_drawer_->HasOpenModalPopup()) {",
+            "          return false;",
+            "        }"
+          ]
+        },
+        {
+          "index": 306,
+          "remove": 0,
+          "insert": [
+            "std::string ReXApp::GetWindowTitle() const {",
+            "  return std::string(GetName()) + \" \" + REXGLUE_BUILD_TITLE;",
+            "}"
+          ]
+        },
+        {
+          "index": 341,
+          "remove": 3,
+          "insert": [
+            "  window_->SetTitle(GetWindowTitle());"
+          ]
+        },
+        {
+          "index": 387,
+          "remove": 0,
+          "insert": [
+            "",
+            "  fps_overlay_ =",
+            "      std::make_unique<ui::FpsOverlayDialog>(imgui_drawer_.get(), frame_stats_provider_);",
+            ""
+          ]
+        },
+        {
+          "index": 601,
+          "remove": 0,
+          "insert": [
+            ""
+          ]
+        },
+        {
+          "index": 604,
+          "remove": 0,
+          "insert": [
+            "",
+            "  if (fps_overlay_) {",
+            "    fps_overlay_->SetStatsProvider(provider);",
+            "  }"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "include/rex/ui/window_sdl.h",
+      "rawSha256": "85B0C2CF9A6195FD285BB3DCE9E205DCFB068D4E622FFD2CC3CE34823EEA7EAF",
+      "patchedSha256": "BBF71CEF564FB11BD3E63B9CC77A9F7CB4DCE2A1B75EEE5F84700C3020E1A398",
+      "edits": [
+        {
+          "index": 35,
+          "remove": 0,
+          "insert": [
+            "  // Resize the normal window immediately. SDL will report the resulting",
+            "  // physical size through the existing resize event path, which updates the",
+            "  // presenter surface.",
+            "  void SetLogicalSize(uint32_t logical_width, uint32_t logical_height);",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "file": "src/ui/window_sdl.cpp",
+      "rawSha256": "70FFE182A72DC07AC992C242869F26F9FC4CA9B7439C94509ED17E0493195B96",
+      "patchedSha256": "764C2F99AC592D291A43C5DE5D539A147AAD54A581A90BE1D86B4FBF51221F7B",
+      "edits": [
+        {
+          "index": 223,
+          "remove": 0,
+          "insert": [
+            "void WindowSDL::SetLogicalSize(uint32_t logical_width,",
+            "                               uint32_t logical_height) {",
+            "  if (!sdl_window_ || logical_width == 0 || logical_height == 0) {",
+            "    return;",
+            "  }",
+            "",
+            "  // Keep the requested game resolution unchanged.",
+            "  OnDesiredLogicalSizeUpdate(logical_width, logical_height);",
+            "",
+            "  int window_width = int(SizeToPhysical(logical_width));",
+            "  int window_height = int(SizeToPhysical(logical_height));",
+            "",
+            "  // Fullscreen uses the normal selected resolution path.",
+            "  if (IsFullscreen()) {",
+            "    SDL_SetWindowSize(sdl_window_, window_width, window_height);",
+            "    return;",
+            "  }",
+            "",
+            "  // Windowed mode must fit inside the usable desktop including decorations.",
+            "  SDL_DisplayID display = SDL_GetDisplayForWindow(sdl_window_);",
+            "  if (!display) {",
+            "    display = SDL_GetPrimaryDisplay();",
+            "  }",
+            "",
+            "  SDL_Rect usable{};",
+            "  if (display && SDL_GetDisplayUsableBounds(display, &usable)) {",
+            "    int border_top = 0;",
+            "    int border_left = 0;",
+            "    int border_bottom = 0;",
+            "    int border_right = 0;",
+            "",
+            "    SDL_GetWindowBordersSize(",
+            "        sdl_window_,",
+            "        &border_top,",
+            "        &border_left,",
+            "        &border_bottom,",
+            "        &border_right);",
+            "",
+            "    int max_width =",
+            "        usable.w - border_left - border_right;",
+            "    int max_height =",
+            "        usable.h - border_top - border_bottom;",
+            "",
+            "    if (max_width > 0 && max_height > 0 &&",
+            "        (window_width > max_width || window_height > max_height)) {",
+            "      double fit_scale = std::min(",
+            "          double(max_width) / double(window_width),",
+            "          double(max_height) / double(window_height));",
+            "",
+            "      window_width =",
+            "          std::max(1, int(double(window_width) * fit_scale));",
+            "      window_height =",
+            "          std::max(1, int(double(window_height) * fit_scale));",
+            "    }",
+            "  }",
+            "",
+            "  SDL_SetWindowSize(sdl_window_, window_width, window_height);",
+            "  SDL_SyncWindow(sdl_window_);",
+            "",
+            "  // Always center windowed mode on the display containing the window.",
+            "  if (display) {",
+            "    SDL_SetWindowPosition(",
+            "        sdl_window_,",
+            "        SDL_WINDOWPOS_CENTERED_DISPLAY(display),",
+            "        SDL_WINDOWPOS_CENTERED_DISPLAY(display));",
+            "    SDL_SyncWindow(sdl_window_);",
+            "  }",
+            "}"
+          ]
+        },
+        {
+          "index": 236,
+          "remove": 0,
+          "insert": [
+            ""
+          ]
+        },
+        {
+          "index": 237,
+          "remove": 0,
+          "insert": [
+            "  SDL_SyncWindow(sdl_window_);",
+            "",
+            "  // When returning to windowed mode, refit and recenter the requested",
+            "  // resolution so the title bar can never be restored off-screen.",
+            "  if (!IsFullscreen()) {",
+            "    SetLogicalSize(",
+            "        GetDesiredLogicalWidth(),",
+            "        GetDesiredLogicalHeight());",
+            "  }"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "src/graphics/graphics_system.cpp",
+      "rawSha256": "26F2CC48303E1638C9E5A0C7C90D9C02902E6F678EF745339A9F6606BAE621AF",
+      "patchedSha256": "6ACB5874C340915C6115AED03330A8D99C316265FFC3F67D352424234D381F3F",
+      "edits": [
+        {
+          "index": 44,
+          "remove": 1,
+          "insert": []
+        },
+        {
+          "index": 82,
+          "remove": 0,
+          "insert": [
+            "uint64_t GraphicsSystem::guest_frame_count() const {",
+            "  return command_processor_ ? command_processor_->guest_frame_count() : 0;",
+            "}",
+            ""
+          ]
+        },
+        {
+          "index": 350,
+          "remove": 0,
+          "insert": [
+            "bool GraphicsSystem::ReinitializeContext() {",
+            "  if (!command_processor_) {",
+            "    return false;",
+            "  }",
+            "",
+            "  rex::thread::Fence fence;",
+            "  bool success = false;",
+            "",
+            "  command_processor_->CallInThread([&] {",
+            "    success = command_processor_->ReinitializeContext();",
+            "    fence.Signal();",
+            "  });",
+            "",
+            "  fence.Wait();",
+            "  return success;",
+            "}"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "src/core/cvar.cpp",
+      "rawSha256": "3F6C3BDBF5F7C0D877463FE6408925213B072C0E0B61DE8A98D370076F231F96",
+      "patchedSha256": "592CEC806C770669C46F571D5F2B4D462F2DA7568F0EDB4A2E3FEC6C625B8459",
+      "edits": [
+        {
+          "index": 488,
+          "remove": 0,
+          "insert": [
+            "// A TOML basic string: every backslash and quote has to be escaped, or the",
+            "// file will not parse. Windows paths are the common case - one unescaped",
+            "// path separator makes the whole config invalid, and every setting in it is",
+            "// lost the next time the game starts.",
+            "std::string EscapeTOMLString(const std::string& value) {",
+            "  std::string out;",
+            "  out.reserve(value.size() + 8);",
+            "  for (const char c : value) {",
+            "    switch (c) {",
+            "      case '\\\\':",
+            "        out += \"\\\\\\\\\";",
+            "        break;",
+            "      case '\"':",
+            "        out += \"\\\\\\\"\";",
+            "        break;",
+            "      case '\\n':",
+            "        out += \"\\\\n\";",
+            "        break;",
+            "      case '\\r':",
+            "        out += \"\\\\r\";",
+            "        break;",
+            "      case '\\t':",
+            "        out += \"\\\\t\";",
+            "        break;",
+            "      default:",
+            "        out += c;",
+            "        break;",
+            "    }",
+            "  }",
+            "  return out;",
+            "}",
+            ""
+          ]
+        },
+        {
+          "index": 494,
+          "remove": 1,
+          "insert": [
+            "        result += entry.name + \" = \\\"\" + EscapeTOMLString(entry.getter()) + \"\\\"\\n\";"
+          ]
+        },
+        {
+          "index": 509,
+          "remove": 1,
+          "insert": [
+            "        result += entry.name + \" = \\\"\" + EscapeTOMLString(entry.getter()) + \"\\\"\\n\";"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "src/system/function_dispatcher.cpp",
+      "rawSha256": "4503E31A4F64C2CFDD6C10AD35A4171D61C72C512853782F1997DEB9ADB76218",
+      "patchedSha256": "A9B7E0B297CF48767A899E88D2014A81068A128AA4AD4D7D100419FBC63E3A46",
+      "edits": [
+        {
+          "index": 72,
+          "remove": 0,
+          "insert": [
+            "  // This may run on a native thread that never went through",
+            "  // XThread::Execute (e.g. a host-driven callback/interrupt dispatch), so",
+            "  // its host FP exception mask was never asserted. This recompiler does not",
+            "  // deliver a guest-visible FP exception, so an unmasked trap here would",
+            "  // otherwise crash the process; re-assert the mask defensively.",
+            "  ctx->fpscr.InitHost();",
+            ""
+          ]
+        },
+        {
+          "index": 140,
+          "remove": 0,
+          "insert": [
+            "  // Interrupts can be dispatched on a native thread that never ran",
+            "  // XThread::Execute (e.g. a GPU/present thread invoking a guest interrupt",
+            "  // callback), so its host FP exception mask was never asserted. Re-assert",
+            "  // it here; this recompiler does not deliver a guest-visible FP exception,",
+            "  // so an unmasked trap here would otherwise crash the process.",
+            "  ctx->fpscr.InitHost();",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "file": "thirdparty/CMakeLists.txt",
+      "rawSha256": "6EBE23341B55D16A7119688757E3E5C97118761539399C0E8E7A659A8288E024",
+      "patchedSha256": "4CD15AF71A54B1DA8B86AF9B8916CE388A954D348715BFA58D74F5FE86FE8524",
+      "edits": [
+        {
+          "index": 114,
+          "remove": 2,
+          "insert": [
+            "# Use real upstream sources, not cabextract symlinks (portable Windows checkout).",
+            "set(MSPACK_DIR \"${CMAKE_CURRENT_SOURCE_DIR}/libmspack/libmspack/mspack\")"
+          ]
+        }
+      ]
+    }
+  ]
+}

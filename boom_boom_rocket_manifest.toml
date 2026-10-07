@@ -1,0 +1,22 @@
+# Template for tools/Regenerate.ps1; original input remains private.
+
+[project]
+name = "boom_boom_rocket"
+sdk_version = "0.9.0"
+game_root = "private/input"
+
+[entrypoint]
+file_path = "private/input/default.xex"
+out_directory_path = "generated/default"
+includes = []
+
+setjmp_address = 0x82167220
+longjmp_address = 0x821675A0
+
+[entrypoint.functions]
+0x8213F0D0 = {}
+0x8213E798 = {}
+0x8214A788 = {}
+0x8216A430 = {}
+0x82120AC0 = {}
+0x8214D020 = {}

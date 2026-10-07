@@ -1,0 +1,6 @@
+# Portable release defaults. Additional settings are saved here by the game.
+license_mask = 1
+fullscreen = false
+vsync = true
+bbr_runtime_shortcuts = false
+

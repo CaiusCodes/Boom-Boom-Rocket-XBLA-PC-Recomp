@@ -1,0 +1,80 @@
+# Private imports, installed games, build output, and local dependencies.
+/out/
+/build/
+/runtime/
+/Game/
+/assets/
+/userdata/
+/logs/
+/private/
+/assets_import_tmp/
+/sdk/
+/deps/
+
+# Never commit retail packages or extracted Xbox game content.
+*.xex
+*.xma
+*.xpr
+*.stfs
+*.live
+*.pirs
+*.con
+
+# Compiled output, archives, debugging artifacts, and local caches.
+*.exe
+*.dll
+*.pdb
+*.obj
+*.o
+*.lib
+*.a
+*.zip
+*.7z
+*.rar
+*.tar
+*.tgz
+*.gz
+*.bz2
+*.xz
+*.dmp
+*.log
+*.passed
+*.bak
+*.tmp
+*.temp
+*.before-*
+*.broken-*
+*.pc-settings-navigation-working
+__pycache__/
+*.pyc
+.cache/
+.vs/
+.idea/
+.vscode/
+CMakeUserPresets.json
+CMakeCache.txt
+CMakeFiles/
+Thumbs.db
+Desktop.ini
+/findstr
+.env
+.env.*
+!.env.example
+
+# Clean regeneration and all four manual hook locations are hash-verified by
+# tools/Regenerate.ps1 and patches/generated.json. Never publish translated code.
+/generated/default/
+# Private historical investigation notes contain machine-specific paths.
+/HANDOVER.md
+/LOCAL-MULTIPLAYER.md
+/MENU-POLISH.md
+/RELEASE-LAYOUT.md
+# Historical setup designs, obsolete packaging paths and duplicate templates.
+/setup/BUILD-NOTES.md
+/setup/concepts/
+/packaging/Install Boom Boom Rocket and DLC.bat
+/packaging/README.txt
+/packaging/github/README.md
+/packaging/github/gitignore.txt
+# Keep original packages outside this workspace: extensionless STFS packages
+# cannot be reliably excluded by extension-based rules.

@@ -1,0 +1,77 @@
+THIRD-PARTY NOTICES
+===================
+
+Boom Boom Rocket XBLA PC Recomp v0.9.1 uses components from the following
+open-source projects.
+
+ReXGlue
+-------
+Project: ReXGlue Xbox 360 Recompilation Runtime and Toolkit
+License: BSD 3-Clause
+
+ReXGlue includes portions derived from the Xenia project. See the included
+LICENSE-ReXGlue.txt file for the complete copyright notices, conditions,
+and disclaimer.
+
+Extract-STFS
+------------
+Project: Extract-STFS
+Component used: tools\Extract-STFS.ps1
+License: MIT
+
+See the included LICENSE-Extract-STFS.txt file for the complete license text
+and copyright notice.
+
+Tracy Profiler
+--------------
+Component used: TracyClient.dll
+License: BSD 3-Clause
+
+See the included LICENSE-Tracy.txt file for the complete copyright notice,
+conditions, and disclaimer.
+
+Boom Boom Rocket, Xbox, Xbox 360, and related names and assets belong to
+their respective rights holders. Original Boom Boom Rocket game data is not
+included with this release.
+
+SDL3
+----
+Project: Simple DirectMedia Layer (https://libsdl.org/)
+License: zlib
+The customized ReXGlue runtime uses SDL3. See LICENSE-SDL3.txt.
+
+The setup's StfsPackage.cs reader adapts the addressing algorithm used by
+Extract-STFS.ps1. The original extractor notice is retained above.
+
+Project code
+------------
+Original setup, tooling, launcher and PC-integration code is MIT licensed.
+See LICENSE-Project.txt. This does NOT license the original/translated game
+code, music, artwork, executable or assets. Users supply their original files.
+
+Native runtime dependencies
+---------------------------
+FFmpeg libavcodec/libavutil: LGPL 2.1 or later; LICENSE-FFmpeg-LGPL.txt.
+libmspack LZX: LGPL 2.1; LICENSE-libmspack.txt.
+Both are statically linked into rexruntime.dll. Their exact source and the
+runtime's rebuild/relink instructions accompany the binary release in
+Boom-Boom-Rocket-XBLA-PC-Recomp-v0.9.1-Dependency-Source.zip. Publish that archive
+alongside the portable ZIP. No original game file is needed to rebuild the
+SDK libraries. The library licenses permit modifications and reverse
+engineering for debugging those modifications. There is no restrictive EULA.
+See https://ffmpeg.org/legal.html and the accompanying source README.
+
+Other compiled/header dependencies (full notices in the named LICENSE files):
+fmt (MIT), spdlog (MIT), Snappy (BSD 3-Clause), Dear ImGui (MIT),
+toml++ (MIT), SIMDe (MIT and its included notices), utfcpp (Boost 1.0),
+xxHash (BSD 2-Clause), o1heap (MIT), aes_128 (MIT), tiny-AES-c (Unlicense),
+Disruptor++ (MIT), CLI11 (BSD 3-Clause), RenderDoc API header (MIT).
+Inja (MIT) is a code-generation tool dependency, not a shipped runtime.
+The development-only GNU PowerPC disassembler uses GPL 2 or later; it is
+not linked into the shipped native runtime or GPU plugin. Its license and
+source notices are preserved in the dependency source archive.
+
+Dependency versions are fixed by ReXGlue commit
+3eb9b511b4140d2769e27be63eae57d41bfa2afa and its submodule commits.
+FFmpeg and libmspack library source is unchanged. The small ReXGlue patches
+retain its BSD license. The project does not vendor a modified local SDK.
