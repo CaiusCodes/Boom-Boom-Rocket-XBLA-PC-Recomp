@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640">
+  <title>Boom Boom Rocket XBLA PC Recomp — social preview</title>
+  <desc>Original project rocket adapted from tools/New-FireworkIcon.ps1. One cyan accent, live editable text, no game assets. All important content inside the 40 px safe area.</desc>
+  <rect width="1280" height="640" fill="#090c10"/>
+  <g id="project-icon" transform="translate(74 177) scale(1.08)">
+    <g transform="rotate(40 128 128)" stroke="#26e0ff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="103,119 79,163 103,154 153,154 177,163 153,119" fill="none"/>
+      <path d="M103 159 C92 105 104 57 128 30 C152 57 164 105 153 159 Z" fill="#090c10"/>
+      <circle cx="128" cy="102" r="13" fill="none"/>
+      <path d="M115 174 V207 M128 174 V232 M141 174 V207" fill="none"/>
+    </g>
+  </g>
+  <g id="title-block" font-family="Segoe UI, Arial, sans-serif">
+    <text x="392" y="279" font-size="76" font-weight="700" fill="#f6f7f8">Boom Boom Rocket</text>
+    <text x="396" y="353" font-size="52" font-weight="600" fill="#26e0ff">XBLA PC Recomp</text>
+    <text x="396" y="423" font-size="48" font-weight="400" fill="#aeb3bb">Native Windows PC Recompilation</text>
+  </g>
+</svg>
