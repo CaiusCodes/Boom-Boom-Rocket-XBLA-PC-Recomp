@@ -78,3 +78,4 @@ IDS_PC_PLAYER_TWO_NAME = Player 2 Name
 IDS_PC_PRESS_A = Press A
 IDS_PC_PRESS_ANY_KEY = Press Any Key
 IDS_PC_KEYS_BONUS = Bonus Run: Space during gameplay
+IDS_PC_MANAGE_FILES = Manage Game Files

@@ -41,6 +41,29 @@ class BoomBoomRocketApp : public rex::ReXApp {
   }
 
   inline static BoomBoomRocketApp* current_instance_ = nullptr;
+  inline static bool dlc_installed_ = false;
+  static void OpenDlcImporter() {
+    auto* app = current_instance_;
+    if (!app || !app->window()) return;
+    wchar_t module[MAX_PATH]{};
+    if (!GetModuleFileNameW(nullptr,module,MAX_PATH)) return;
+    const auto launcher = std::filesystem::path(module).parent_path().parent_path() / L"Boom Boom Rocket.exe";
+    const auto hwnd = static_cast<HWND>(app->window()->GetNativeWindowHandle());
+    if (dlc_installed_) {
+      MessageBoxW(hwnd,L"Boom Boom Rock Pack DLC is already installed.",L"Download Content",MB_OK|MB_ICONINFORMATION);
+      return;
+    }
+    if (!std::filesystem::exists(launcher)) {
+      MessageBoxW(hwnd,L"Use the complete single-launcher portable build to import DLC.",L"Download Content",MB_OK|MB_ICONINFORMATION);
+      return;
+    }
+    const std::wstring arguments = L"--dlc --wait-pid=" + std::to_wstring(GetCurrentProcessId());
+    if (reinterpret_cast<INT_PTR>(ShellExecuteW(hwnd,L"open",launcher.c_str(),arguments.c_str(),launcher.parent_path().c_str(),SW_SHOWNORMAL))<=32) {
+      MessageBoxW(hwnd,L"Could not open the portable launcher.",L"Download Content",MB_OK|MB_ICONERROR);
+      return;
+    }
+    PostMessageW(hwnd,WM_CLOSE,0,0); // Normal runtime shutdown; manager waits for exit.
+  }
 
   static std::unique_ptr<rex::ui::WindowedApp> Create(
       rex::ui::WindowedAppContext& ctx) {
@@ -275,6 +298,7 @@ class BoomBoomRocketApp : public rex::ReXApp {
     const auto assets_path =
         app_directory / "assets";
 
+#if defined(BBR_LEGACY_IMPORT)
     const auto temp_path =
         app_directory / "assets_import_tmp";
 
@@ -401,6 +425,15 @@ class BoomBoomRocketApp : public rex::ReXApp {
           MB_OK | MB_ICONINFORMATION);
     }
 
+#else
+    // The public launcher performs validation/import. Do not invoke a second
+    // runtime installer or PowerShell extractor in the single-launcher build.
+    if (!std::filesystem::exists(assets_path / "default.xex")) {
+      MessageBoxW(nullptr,L"Open Boom Boom Rocket.exe in the portable root and select your original package.",L"Game files required",MB_OK|MB_ICONINFORMATION);
+      ExitProcess(1);
+    }
+    EnsurePcSettingStrings(assets_path);
+#endif
     UpdateMainMenuText(
         assets_path,
         paths.user_data_root);
@@ -907,7 +940,8 @@ class BoomBoomRocketApp : public rex::ReXApp {
         L"IDS_PC_PLAYER_TWO_NAME = Player 2 Name\r\n"
         L"IDS_PC_PRESS_A = Press A\r\n"
         L"IDS_PC_PRESS_ANY_KEY = Press Any Key\r\n"
-        L"IDS_PC_KEYS_BONUS = Bonus Run: Space during gameplay";
+        L"IDS_PC_KEYS_BONUS = Bonus Run: Space during gameplay\r\n"
+        L"IDS_PC_MANAGE_FILES = Manage Game Files";
 
     for (const wchar_t* language_file : language_files) {
       const auto ini_path =
@@ -1219,6 +1253,7 @@ class BoomBoomRocketApp : public rex::ReXApp {
       }
     }
 
+    dlc_installed_ = dlc_installed;
     const auto ini_path =
         assets_path /
         "UI" /
@@ -1281,8 +1316,8 @@ class BoomBoomRocketApp : public rex::ReXApp {
 
     const std::wstring message =
         dlc_installed
-            ? L"Boom Boom Rock Pack DLC is installed."
-            : L"To install the Boom Boom Rocket Rock Pack DLC please exit the game and run Setup Boom Boom Rocket.exe.";
+            ? L"Boom Boom Rock Pack DLC is already installed."
+            : L"Select to install your Boom Boom Rock Pack DLC.";
 
     text.replace(
         start,
@@ -1304,6 +1339,7 @@ class BoomBoomRocketApp : public rex::ReXApp {
           label_key + value);
     };
     replace_menu_label(L"IDS_RETURN_TO_ARCADE = ", L"Exit Game");
+    replace_menu_label(L"IDS_DOWNLOADABLE_CONTENT = ", L"Download Content");
     replace_menu_label(L"IDS_CONTROLS = ", L"Gamepad Controls");
     replace_menu_label(L"IDS_MULTI_PLAYER_INFO = ", L"Battle against a friend locally. Connect two controllers.");
     replace_menu_label(L"IDS_NOT_ENOUGH_USERS = ",

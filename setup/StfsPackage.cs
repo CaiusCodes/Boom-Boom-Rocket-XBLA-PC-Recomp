@@ -108,6 +108,20 @@ namespace Bbr.Setup {
             if(next>=0xFFFFFE) throw new InvalidDataException("STFS block chain ended early.");
             return next;
         }
+        internal byte[] ReadFile(string relative) {
+            var e=entries.FirstOrDefault(item=>!item.Directory && item.Path.Equals(relative,StringComparison.OrdinalIgnoreCase));
+            if(e==null || e.Size>64*1024*1024) throw new InvalidDataException("Missing or oversized package file: "+relative);
+            using(var output=new MemoryStream()) {
+                long remaining=e.Size;int block=e.Block;var visited=new HashSet<int>();
+                while(remaining>0) {
+                    if(!visited.Add(block)) throw new InvalidDataException("Cyclic package file chain.");
+                    int count=(int)Math.Min(4096,remaining);byte[] bytes=Read(Address(block),count);
+                    output.Write(bytes,0,count);remaining-=count;
+                    if(remaining>0)block=e.Consecutive?block+1:Next(block);
+                }
+                return output.ToArray();
+            }
+        }
         internal void Extract(string root, Action<int,string> progress, CancellationToken cancel) {
             Directory.CreateDirectory(root); long done=0; int last=-1;
             foreach(var e in entries) {

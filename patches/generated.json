@@ -284,7 +284,7 @@
     {
       "file": "boom_boom_rocket_recomp.2.cpp",
       "rawSha256": "11A1D46ADBBA54388F2CC0268EDEBB40FAD09A8C495ADAE7A0F200F9821AEFF7",
-      "patchedSha256": "AD4420F4DF3529395E01E6837E7B81DBAC9BD9597F8126C197FB00C618D8F9B8",
+      "patchedSha256": "D8E92E90E03E2EDB0BD12893753E245B292C82253DD7D5ECF3A92D7A9E5FE720",
       "edits": [
         {
           "index": 1,
@@ -294,6 +294,7 @@
             "#include \"../../src/native_menu_mouse.h\"",
             "#include \"../../src/rocket_labels.h\"",
             "#include <string_view>",
+            "void BBR_OpenDlcImporter();",
             "",
             "",
             "",
@@ -894,10 +895,9 @@
           "remove": 0,
           "insert": [
             "",
-            "        // TEMP TEST:",
-            "        // Set the same menu state used by Multiplayer.",
-            "        ctx.r4.u64 = 1;",
-            "        sub_820A4F48(ctx, base);",
+            "        // Offline main-menu Download Content action: use the portable DLC importer.",
+            "        BBR_OpenDlcImporter();",
+            "        ctx.r3.u64 = 0;",
             "        return;",
             "}"
           ]

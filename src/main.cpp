@@ -78,6 +78,8 @@ uint32_t BBR_BeginUiScript(const char* name, uint8_t* base) {
   return 0;
 }
 
+void BBR_OpenDlcImporter() { BoomBoomRocketApp::OpenDlcImporter(); }
+
 bool BBR_ReadNativeHelp(uint8_t* data, uint32_t& size) {
   return bbr::native_help_reader.Read({data,512},size);
 }

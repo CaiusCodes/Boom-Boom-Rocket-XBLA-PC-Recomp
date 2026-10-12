@@ -7,7 +7,7 @@ Xenia. Current version: **0.9.1**.
 
 > **You need your own legally obtained copy of Boom Boom Rocket.** This project
 > contains no original game executable, graphics, sound, music or other game
-> data. Setup imports the supported Xbox 360 game package you provide, and the
+> data. The launcher imports the supported Xbox 360 game package you provide, and the
 > optional Boom Boom Rock Pack DLC, into your own portable game folder.
 
 If you enjoy this project, you can support future recomp projects on Ko-fi.
@@ -21,7 +21,7 @@ Support is optional, and all projects and releases remain free.
 
 - Windows 10 or 11, 64-bit
 - An AVX2-capable x86-64-v3 CPU and a Direct3D 12-capable GPU
-- .NET Framework 4.8 for setup and the play launcher
+- .NET Framework 4.8 for the portable launcher
 - Your own Boom Boom Rocket XBLA package (Title ID `5841086A`)
 - Optional: your own **Boom Boom Rock Pack DLC** package
 
@@ -33,21 +33,45 @@ two Xbox-compatible controllers connected before launch.
 1. Download `Boom-Boom-Rocket-XBLA-PC-Recomp-v0.9.1.zip` from
    [Releases](https://github.com/CaiusCodes/Boom-Boom-Rocket-XBLA-PC-Recomp/releases).
 2. Extract the whole ZIP into a writable folder, outside Program Files.
-3. Run **Setup Boom Boom Rocket.exe** and select your original game package.
+3. Open **Boom Boom Rocket.exe** in the extracted root. Select your original
+   package, or drag and drop a package or its folder into the window.
    Packages can be extensionless; do not select a ZIP or `default.xex`.
-4. Optionally select the **Boom Boom Rock Pack DLC**, then choose **Install game**.
-5. Choose **Play now**, or launch `Game/Boom Boom Rocket.exe` afterward.
+4. Import runs immediately after selection. Add optional DLC if wanted, then
+   click **Play**. First setup stays open until you choose to play. Optional
+   Extras can start in fullscreen or create a desktop shortcut; both default off.
+   One compatible package beside the launcher is imported automatically. If
+   several are found, choose one from the list. No whole-computer scan is done.
 
-Before setup, the release root contains only setup, `README.txt` and `licenses/`.
-Setup creates `Game/`, containing the play launcher, `resources/` and
-`release-manifest.json`. Settings, saves, imported assets, DLC and caches stay
-under `Game/resources/`. Move or back up the whole portable folder together.
+The release root contains `Boom Boom Rocket.exe`, `resources/`, `README.txt`,
+and `licenses/`. The native runtime is internal to `resources/`; only the root
+launcher is user-facing. Settings, saves, assets, DLC and caches stay under
+`resources/`. Move or back up the whole portable folder together.
 No administrator access or registry installation is needed.
 
-Run setup again to add DLC later; existing saves and settings are preserved.
-Do not redistribute a populated `Game/` folder or your original game packages.
+Subsequent launches start the game directly, with no import interface or original
+package required. The original package is never modified or deleted.
 
-![Portable setup with the local folder path removed](docs/screenshots/setup.png)
+For DLC on first launch, use **Browse DLC (optional)** before or after choosing
+the game package, then click **Play**. **Skip DLC** clears a queued optional
+selection. Alternatively, use **Download Content** on the main menu later.
+Selecting it closes the game first and uses the same launcher. If installed,
+the side description says **Boom Boom Rock Pack DLC is already installed**. To repair/reselect the base package, close the
+game and run `"Boom Boom Rocket.exe" --manage`. DLC never blocks the initial import.
+
+Browse Package is disabled after a successful first import. Fullscreen is saved
+in the portable settings only if selected. Desktop shortcuts target the root
+launcher and are optional; recreate the shortcut if you move the portable folder.
+Existing shortcuts are never overwritten.
+
+![Portable import window](docs/screenshots/setup.png)
+
+For an older Setup/Game release, extract the new ZIP into the same portable root
+to automatically copy compatible assets, settings and saves from `Game/resources`.
+Alternatively drag the old portable folder into the first-launch window.
+Old folders are left untouched as a backup; conflicting user-data destinations
+are rejected rather than silently overwritten. Updates to the new layout reuse
+assets and preserve saves; `resources/defaults.toml` never replaces your config.
+Do not redistribute imported `resources/assets` or original game packages.
 
 ## Features
 
@@ -92,14 +116,14 @@ See the included release `README.txt` for calibration and troubleshooting detail
   timing feel and long two-player sessions still need wider user testing.
 - Xbox Live, online multiplayer, system leaderboards, achievement UI and
   Marketplace screens are unavailable.
-- The runtime uses one tested executable layout. Setup verifies the extracted
+- The runtime uses one tested executable layout. The launcher verifies the
   XEX SHA256, not the container filename or hash:
   `B1BC45589CEC79E375E23FC48C122FA5902A2DFD6E3C9C765064DCD9E1A8709B`.
   Other executable revisions need separate compatibility testing.
-- Setup and the game are not digitally signed. Check the release's origin if
+- The launcher and the game are not digitally signed. Check the release's origin if
   Windows displays a warning. VSync defaults on; saved choices are preserved.
 
-For bug reports, include the newest log from `Game/resources/logs/`, after
+For bug reports, include the newest log from `resources/logs/`, after
 checking it for personal installation paths. Do not attach original game files.
 
 ## For developers
@@ -107,6 +131,11 @@ checking it for personal installation paths. Do not attach original game files.
 You need Git, CMake 3.25+, Ninja, Clang 18+, Windows PowerShell, and the Visual
 Studio C++ Build Tools with Windows SDK, plus your own game package. Tested with
 Clang 22.1.8, CMake 4.4.2, Ninja 1.13.2 and .NET Framework 4.8.
+
+Latest local verification warning: fresh ReXGlue code generation exited
+unexpectedly. The updated deterministic hooks passed replay against previously
+verified raw generator output, but a new full generation was not confirmed on
+this machine. The runtime build and 89 launcher/import checks passed.
 
 From the project directory:
 
@@ -116,7 +145,7 @@ From the project directory:
 ./tools/Regenerate.ps1 -GamePackage "PATH_TO_YOUR_ORIGINAL_PACKAGE"
 cmake --preset win-amd64-release
 cmake --build --preset win-amd64-release --target boom_boom_rocket
-./tools/Build-Setup.ps1
+./tools/Build-Launcher.ps1
 ```
 
 ReXGlue is fetched into ignored `out/dependencies/rexglue-sdk`, pinned to commit
@@ -136,12 +165,18 @@ For isolated builds, use new `-BuildDirectory`/`-InstallDirectory` arguments to
 matching regeneration `-SdkPrefix`. The game builds to
 `out/build/win-amd64-release/boom_boom_rocket.exe`.
 
-`Make Release.bat` builds and packages setup. Alternatively use
-`tools/Package-Portable.ps1 -SetupExe ... -ReleaseDirectory ...` and
+`Make Release.bat` builds and packages the single launcher. Alternatively use
+`tools/Package-Launcher.ps1 -PortableFolder ...` and
 `tools/Package-DependencySource.ps1 -Destination ...`. Publish the portable ZIP
 and matching dependency-source ZIP together. GitHub's tagged source archive
 contains the complete project; a separate project-source ZIP is not needed.
 `VERSION` records the release version. Never commit private imports or `out/`.
+
+Launcher/import details and test coverage: [docs/launcher.md](docs/launcher.md).
+Release ZIP and immutable-file SHA-256 checksums are supplied. Executables are
+ordinary unsigned builds, without an embedded runtime archive, packer or admin
+request. This reduces unnecessary packaging complexity but cannot guarantee an
+antivirus verdict. Do not disable Windows security to run the project.
 
 ## Licence and credits
 

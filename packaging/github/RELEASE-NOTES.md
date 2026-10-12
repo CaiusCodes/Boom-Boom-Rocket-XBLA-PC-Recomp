@@ -1,125 +1,99 @@
 # Boom Boom Rocket XBLA PC Recomp v0.9.1
 
-## Updated v0.9.1 build (12 October 2026)
+## Portable launcher update — 12 October 2026
 
-- Space activates Bonus Run (right trigger) during gameplay; it remains Start
-  in menus. Enter and gameplay Escape retain their Start/pause mappings.
-- WASD and arrow keys send D-pad state and keystrokes in menus and gameplay.
-- Keyboard help documents Bonus Run, including upgrades of existing help text.
-- Skip the first-play rocket-label chooser, retaining automatic keyboard/pad
-  labels and any choice saved in Settings.
-- Preserve keyboard keystrokes when a connected physical controller is idle.
-- Updated documentation screenshots and original-project social preview.
+The existing v0.9.1 tag and downloads have been refreshed for this build.
 
-The v0.9.1 downloads and tag have been refreshed for this build. Existing saves
-and settings are preserved when running setup in an existing portable folder.
+- One user-facing executable: **Boom Boom Rocket.exe**. No separate setup EXE.
+- Select your legally obtained original Xbox 360 game package, or drag a package
+  or its folder into the import window. A single compatible package beside the
+  launcher is detected automatically; multiple matches require a choice.
+- Import the optional **Boom Boom Rock Pack DLC** before or after the base game,
+  then click **Play**. First setup stays open; later launches go straight into
+  the game without requiring the original package again.
+- Refined original-project neon interface, with wider buttons, improved spacing
+  and no First Launch heading. Browse Package is disabled after successful import.
+- Optional Extras: start in fullscreen and create a desktop shortcut. Both default
+  off and apply on Play. Existing shortcuts are never overwritten.
+- Main-menu **Download Content** opens the same launcher's DLC importer when the
+  pack is absent. Its description reads **Select to install your Boom Boom Rock
+  Pack DLC.** Once present, it reads **Boom Boom Rock Pack DLC is already installed.**
+- No Manage Game Files entry in Help & Options. To repair/re-import, close the game
+  and run `"Boom Boom Rocket.exe" --manage`.
+- Interrupted imports use staging, locking and journaled rollback. Original
+  packages are never modified or automatically deleted.
+- Ordinary EXE/DLL packaging replaces the embedded executable archive. No packer,
+  obfuscation, administrator privileges or system-wide installation.
 
-## Publication preparation
+## Install / update
 
-- All four generated-code hook locations now apply through deterministic,
-  hash-verified patches; clean regeneration reproduces the working source.
-- Pinned upstream ReXGlue with 21 focused file patches replaces reliance on the
-  shared modified SDK. Unrelated SDK changes and debug traces are excluded.
-- Original project integration/tooling is MIT licensed. Third-party notices and
-  matching LGPL dependency sources accompany the portable tool.
-- No original game package, XEX, assets or generated game source is distributed.
+Extract the complete portable ZIP into a writable folder and open
+**Boom Boom Rocket.exe**. Users must supply their own legally obtained game
+package and, optionally, the Rock Pack DLC. This project does not distribute the
+original package, XEX, graphics, sound, music or other game data.
 
-- Setup now identifies the tested XEX revision before committing imports or
-  runtime updates. Title ID alone is not enough for the embedded, fixed-address
-  recompilation. The fingerprint is also recorded in release-manifest.json.
+```text
+Boom Boom Rocket/
+├── Boom Boom Rocket.exe
+├── resources/
+├── README.txt
+└── licenses/
+```
 
-- Public ZIP root contains only Setup Boom Boom Rocket.exe, README.txt and licenses/.
-- Setup creates Game/Boom Boom Rocket.exe, Game/resources/ and Game/release-manifest.json.
-- Internal native runtime, matching DLLs, settings, imported assets, DLC and saves
-  now live together under Game/resources.
-- The manifest records Game-relative paths and immutable runtime file hashes,
-  not private game files, saves or mutable settings.
-- Older layouts are rejected with fresh-folder guidance; existing installations
-  are not partially migrated or deleted.
-- Both current and historical packaging entry points use the same allowlisted
-  setup pipeline. No original XBLA package, XEX or development project is shipped
-  in the portable ZIP; matching library sources are a separate release asset.
+The internal native runtime, imported assets, configuration, DLC and saves live
+under `resources/`. Move or back up the complete folder together. A desktop
+shortcut must be recreated if the portable folder is relocated.
 
-## Preserved menu polish
+For existing single-launcher copies, replace the supplied files, including the
+runtime files under resources; retain imported assets, userdata and your saved
+`boom_boom_rocket.toml`. Defaults do not overwrite saved settings.
+Older Setup/Game copies can migrate compatible assets, settings and saves from
+`Game/resources` when the new ZIP is extracted into the same portable root.
+Old directories remain untouched; conflicting user-data destinations are rejected
+rather than silently overwritten.
 
-- Setup package browsers start beside the setup executable.
-- Runtime F3/F4/F7/backtick shortcuts are disabled, with an opt-in diagnostic switch.
-- Native Gamepad Controls, Keyboard Controls and manual Timing Calibration pages.
-- Settings has nine rows, including Reset Display Settings; no player-name rows.
-- Fresh installations pick two different random names from the supplied list;
-  existing names and saves survive updates and DLC installation.
-- Native menu mouse selection; song lists use paced wheel scrolling instead of
-  hover selection, and left-click confirms the highlighted song.
-- Hide controller-button icons in menus when no controller is connected.
-- Timing adjustment shifts native note judgement, from -200 to +200 ms in 10 ms
-  steps, applied at the next song/restart. It does not change music speed.
-- Installer integration now also checks manifest hashes, clean root contents,
-  the resources layout and legacy-folder protection; layout tests cover 100–200%.
-- Timing feel, physical controller hot-plug and long two-player matches still
-  need user testing. This remains a testing release, not a stability guarantee.
+## Preserved features
 
-## Preserved changes from the local multiplayer baseline
+- Native Windows recompilation using pinned ReXGlue, not an Xenia launcher.
+- Keyboard, mouse and controller support; Space is Bonus Run during gameplay,
+  Enter starts and Escape pauses/resumes during gameplay or goes back in menus.
+- Native display settings, VSync on by default, optional FPS display and manual
+  timing calibration. Automatic rocket labels retain user-saved preferences.
+- Experimental local two-controller multiplayer, with separate offline profiles.
+- Original menu improvements, including removal of unsupported achievement and
+  leaderboard entries, first-play chooser bypass and clean desktop exit.
+- MIT-licensed project integration/tooling, preserved third-party notices and
+  matching dependency sources. MIT does not license the original game or assets.
 
-- Controls revision: arrow keys supplement WASD. Esc sends Start during gameplay/countdown,
-  and B in menus (including pause). Its key-down mapping is latched through screen transitions
-  so releasing Esc after pause opens cannot leave Start stuck or send an extra Back.
+## Validation and limitations
 
-- Experimental local Battle and Endurance through the game's original two-player menus.
-- Controller 2 receives an offline `Player 2` profile with a stable, distinct ID.
-- Player-two save data is isolated under `Game/resources/userdata/5841086A/profile/Player2`.
-- Guest profile loads/writes support asynchronous completion and portable persistence.
-- Main-menu help now asks for two controllers; all existing menu and portability changes remain.
-- Verified both modes reach two-player gameplay, player-two pause navigation, and independent input indices
-  using a private simulated second pad. That diagnostic driver is NOT included in the public runtime.
-- Two real controllers, hot-plug recovery, and long matches still require user validation.
-- Connect both controllers before launch. Keyboard/mouse supplement player 1 only.
-- No Xbox Live accounts, online play, profile picker, or independent player-two achievement store added.
+- Build succeeded and 89 launcher/import checks passed, including game-first DLC
+  import, explicit Play gating, disabled Browse Package, opt-in fullscreen,
+  shortcut target/collision protection, migration, cancellation and crash recovery.
+- The game and DLC import/handoff were locally launched; wider new-machine,
+  real-controller hot-plug and long multiplayer testing remain recommended.
+- Packages are validated against the supported executable revision, not Title ID
+  alone. Other executable revisions require compatibility testing.
+- Executables remain unsigned. Antivirus false positives cannot be ruled out;
+  do not disable Windows security.
+- Developer warning: fresh ReXGlue code generation exited unexpectedly during
+  the latest local check. Updated deterministic hooks passed replay against
+  previously verified raw generator output; a new full generation was not
+  confirmed on this machine. Generated translated game source is not committed.
 
-- Version numbering reset to `v0.9.1`; smoother title-screen version text at the same size.
-- Player-one keyboard/mouse support, alongside controllers: WASD directions,
-  Enter Start, Space Bonus Run during play/Start in menus, E/left-click A,
-  B/Backspace/right-click B, X and Y.
-- Focus loss and overlay capture release input; overlapping aliases work correctly.
-- Skip the new-profile welcome acknowledgement while preserving creation and saving.
-- Earlier baseline marked Multiplayer "coming soon"; this test build supersedes that text.
+## Downloads
 
-- Separate neon rocket icon for the play launcher and game window; setup retains its firework.
-- Small version label at the bottom left of the title screen only.
-- Existing native menu changes, portable data layout and VSync default preserved.
-- Normalize ZIP path separators before using extended Windows paths (PowerShell 7 builds).
+- `Boom-Boom-Rocket-XBLA-PC-Recomp-v0.9.1.zip` — portable tool, without game data.
+- `Boom-Boom-Rocket-XBLA-PC-Recomp-v0.9.1-Dependency-Source.zip` — matching SDK and
+  library source/licences. This is for developers and licence compliance, not play.
+- GitHub's tagged source archive contains the project integration, tooling and
+  deterministic patches; no separate project Source.zip is needed.
 
-- Fixed high-DPI startup layout: scale controls only after construction finishes.
-- Text, path frames, section numbers and buttons now use the same scaled layout.
-- Fixed double DPI scaling of the drawn SETUP subtitle.
-- VSync remains on by default. Existing saved settings are preserved.
-- Added simulated startup layout checks at 100%, 125%, 150%, 175% and 200%.
+Immutable supplied-file SHA-256 checksums are inside resources/SHA256SUMS.txt.
 
-- One setup EXE with the Minimal Neon design.
-- Base-game selection and optional Boom Boom Rock Pack DLC on the same screen.
-- Renamed installer: `Setup Boom Boom Rocket.exe`.
-- Download Content help now directs players to `Setup Boom Boom Rocket.exe`.
-- Product and window title are now `Boom Boom Rocket`.
-- Main menu uses `Exit Game`, with help text `Quit Boom Boom Rocket and return to desktop.`
-- Extracts `Game/Boom Boom Rocket.exe`, with an original neon rocket icon.
-- Runtime, DLLs, assets, DLC, settings, logs and saves are contained in `Game/resources`.
-- Reopen setup in the portable folder to add DLC later.
-- Existing saves, achievements and configuration are preserved.
-- Package validation, progress, cancellation and rollback.
-- No game or DLC assets included.
+### Download SHA-256
 
-Extract the ZIP to a fresh writable folder and run **Setup Boom Boom Rocket.exe**. You will need your
-own original Xbox 360 game package and, optionally, the DLC package.
-
-Earlier installer engine and launcher baseline: 30 checks passed, including relocation and an
-unrelated starting working directory. Imports previously matched 320 unchanged
-base-game files and 80 DLC files from the working test installation. The native
-setup interface has been visually checked. A new-machine gameplay test remains
-recommended for this release.
-
-This release enables local multiplayer experimentally. The tagged source archive
-covers the complete integration project, setup, tooling, tests and deterministic
-patches. Rebuilding the game runtime requires the user's original game package
-and the pinned dependencies fetched by the documented scripts. Publish the
-matching `Boom-Boom-Rocket-XBLA-PC-Recomp-v0.9.1-Dependency-Source.zip` alongside
-`Boom-Boom-Rocket-XBLA-PC-Recomp-v0.9.1.zip`; a separate project-source ZIP is not
-needed on GitHub.
+```text
+BBBC2DE86A3F4A36F67D8991A951067D5E669525E28AE8FFC1E03215DFAEBE34  Boom-Boom-Rocket-XBLA-PC-Recomp-v0.9.1.zip
+2E5BA81D8FE690A8C1F159F987819B68D3B276B132957F04606F8F6DDD23A194  Boom-Boom-Rocket-XBLA-PC-Recomp-v0.9.1-Dependency-Source.zip
+```

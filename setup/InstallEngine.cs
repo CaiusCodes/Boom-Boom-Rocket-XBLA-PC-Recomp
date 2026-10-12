@@ -30,6 +30,7 @@ namespace Bbr.Setup {
             if(!string.Equals(hash,SupportedXexSha256,StringComparison.OrdinalIgnoreCase))
                 throw new InvalidDataException("This Boom Boom Rocket executable revision is not supported by the bundled PC runtime. Select the original, unmodified base-game package. Your existing files have not been changed.");
         }
+#if !BBR_PORTABLE_LAUNCHER
         internal static bool HasGame(string root) { return RequiredAssets.All(p=>File.Exists(Path.Combine(root,"Game","resources","assets",p))); }
         internal static bool HasDlc(string root) { string p=Path.Combine(root,"Game","resources","userdata","0000000000000000","5841086A","00000002"); return Directory.Exists(p) && Directory.GetDirectories(p).Length>0; }
         internal static string DefaultDestination() {
@@ -151,6 +152,7 @@ namespace Bbr.Setup {
                 }
             } finally { if(game!=null)game.Dispose(); if(dlc!=null)dlc.Dispose(); }
         }
+#endif
         internal static void PatchLabels(string assets) {
             string block;
             using(var input=new StreamReader(Assembly.GetExecutingAssembly().GetManifestResourceStream("Bbr.PcStrings"),Encoding.UTF8)) block=input.ReadToEnd();
