@@ -24,9 +24,13 @@ class KeyboardState {
   void Set(uint16_t key, bool down, bool gameplay = false, bool title_start = false) {
     if (key >= keys_.size() || keys_[key] == down) return;
     const uint16_t before = Buttons();
+    const bool trigger_before = RightTriggerHeld();
     // Latch Esc's meaning at key-down. A pause/menu transition before key-up
     // must release the original button, not manufacture Back or leave Start held.
     if (key == 0x1B && down) escape_button_ = gameplay ? 0x10 : 0x2000;
+    // Space keeps its key-down role until released, even across pause/menu
+    // transitions. A title-screen any-key press must remain Start.
+    if (key == 0x20 && down) space_bonus_ = gameplay && !title_start;
     keys_[key] = down;
     // Any-key Start is latched until key-up, even after the main menu opens.
     // The same held key must not become A, Back or a direction mid-press.
@@ -40,12 +44,19 @@ class KeyboardState {
       if (events_.size() == 128) events_.pop_front();
       events_.push_back({bind.pad_key, (after & bind.button) != 0});
     }
+    const bool trigger_after = RightTriggerHeld();
+    if (trigger_before != trigger_after) {
+      pending_trigger_ |= trigger_after;
+      if (events_.size() == 128) events_.pop_front();
+      events_.push_back({0x5807, trigger_after}); // Xbox right trigger
+    }
   }
   uint16_t Buttons() const {
     uint16_t buttons = 0;
     for (bool held : title_keys_) if (held) { buttons |= 0x10; break; }
     for (auto bind : keyboard_bindings)
-      if (keys_[bind.key] && !title_keys_[bind.key])
+      if (keys_[bind.key] && !title_keys_[bind.key] &&
+          !(bind.key == 0x20 && space_bonus_))
         buttons |= bind.key == 0x1B ? escape_button_ : bind.button;
     return buttons;
   }
@@ -54,16 +65,30 @@ class KeyboardState {
     pending_ = 0; // Preserve a tap that began and ended between guest polls.
     return buttons;
   }
+  uint8_t PollRightTrigger() {
+    const bool pressed = RightTriggerHeld() || pending_trigger_;
+    pending_trigger_ = false; // Preserve a quick tap between guest polls.
+    return pressed ? 255 : 0;
+  }
   bool Pop(PadKeyEvent& event) {
     if (events_.empty()) return false;
     event = events_.front(); events_.pop_front(); return true;
   }
-  void Clear() { keys_.fill(false); title_keys_.fill(false); pending_ = 0; events_.clear(); escape_button_ = 0x2000; }
+  void Clear() {
+    keys_.fill(false); title_keys_.fill(false); pending_ = 0;
+    events_.clear(); escape_button_ = 0x2000;
+    space_bonus_ = false; pending_trigger_ = false;
+  }
  private:
+  bool RightTriggerHeld() const {
+    return keys_[0x20] && !title_keys_[0x20] && space_bonus_;
+  }
   std::array<bool, 256> keys_{};
   std::array<bool, 256> title_keys_{};
   uint16_t pending_ = 0;
   uint16_t escape_button_ = 0x2000;
+  bool space_bonus_ = false;
+  bool pending_trigger_ = false;
   std::deque<PadKeyEvent> events_;
 };
 } // namespace bbr

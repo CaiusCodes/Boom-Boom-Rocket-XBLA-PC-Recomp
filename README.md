@@ -47,6 +47,8 @@ No administrator access or registry installation is needed.
 Run setup again to add DLC later; existing saves and settings are preserved.
 Do not redistribute a populated `Game/` folder or your original game packages.
 
+![Portable setup with the local folder path removed](docs/screenshots/setup.png)
+
 ## Features
 
 - Native Windows build using ReXGlue's graphics, audio and Xbox-service runtime
@@ -59,6 +61,10 @@ Do not redistribute a populated `Game/` folder or your original game packages.
 - Automatic controller/keyboard rocket labels, unless you save a manual choice
 - Title-screen version label and distinct setup/game icons
 
+![Main menu](docs/screenshots/main-menu.png)
+
+![Single-player gameplay with arrow rocket labels](docs/screenshots/gameplay.png)
+
 ![Settings with display mode, resolution, VSync, FPS and reset display options](docs/screenshots/settings.png)
 
 ## Controls
@@ -66,7 +72,8 @@ Do not redistribute a populated `Game/` folder or your original game packages.
 | Key / button | Action |
 |---|---|
 | WASD or arrow keys | Directions / menu navigation |
-| Enter or Space | Start / pause |
+| Enter | Start / pause |
+| Space | Bonus Run during gameplay (right trigger); Start in menus |
 | Escape | Pause during play; B / back in menus |
 | E or left click | A / confirm |
 | B, Backspace or right click | B / back |

@@ -33,6 +33,7 @@ class BbrKeyboardDriver final : public rex::input::InputDriver,
     if (out) {
       *out = {}; out->type = 1; out->sub_type = 1;
       out->gamepad.buttons = 0xF01F;
+      out->gamepad.right_trigger = 255;
     }
     return X_ERROR_SUCCESS;
   }
@@ -43,8 +44,14 @@ class BbrKeyboardDriver final : public rex::input::InputDriver,
     if (!connected_) return X_ERROR_DEVICE_NOT_CONNECTED;
     if (!focused_ || !active) state_.Clear();
     const uint16_t buttons = state_.Poll();
-    if (buttons != last_buttons_) { ++packet_; last_buttons_ = buttons; }
-    if (out) { *out = {}; out->packet_number = packet_; out->gamepad.buttons = buttons; }
+    const uint8_t right_trigger = state_.PollRightTrigger();
+    if (buttons != last_buttons_ || right_trigger != last_right_trigger_) {
+      ++packet_; last_buttons_ = buttons; last_right_trigger_ = right_trigger;
+    }
+    if (out) {
+      *out = {}; out->packet_number = packet_; out->gamepad.buttons = buttons;
+      out->gamepad.right_trigger = right_trigger;
+    }
     return X_ERROR_SUCCESS;
   }
   X_RESULT SetState(uint32_t user, rex::input::X_INPUT_VIBRATION*) override {
@@ -149,5 +156,6 @@ class BbrKeyboardDriver final : public rex::input::InputDriver,
   std::mutex mutex_;
   bbr::KeyboardState state_;
   uint16_t last_buttons_ = 0;
+  uint8_t last_right_trigger_ = 0;
   uint32_t packet_ = 0;
 };

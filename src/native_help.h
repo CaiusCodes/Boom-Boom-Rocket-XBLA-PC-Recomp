@@ -8,6 +8,25 @@ namespace bbr {
 // Authored PC UI, evaluated by the game's own Lua 5.1/menu engine. No retail
 // bytecode is redistributed here. Existing screens and numeric menu values stay
 // unchanged; the added keyboard page borrows only the stock loader's stream.
+// Skip the obsolete first-play rocket chooser without selecting/storing a
+// spinner value. The host's automatic or user-saved rocket-label policy remains
+// authoritative. Clear the stock first-play flag and retain its normal forward
+// destination; profile creation/loading/saving is handled before this screen.
+inline constexpr std::string_view first_time_play_source = R"lua(
+GUI = {finished=0}
+function Init()
+  Screen.SetTimers(0,0)
+  Game.SetInitialHelpScreen(false)
+end
+function Update()
+  if GUI.finished == 1 then return end
+  GUI.finished = 1
+  Screen.SetNextScreen("Main\\SpChooseGameType.lua")
+end
+function Message(message,pad,data) end
+function Exit() end
+)lua";
+
 inline constexpr std::string_view help_menu_source = R"lua(
 GUI = {menu_ID=-1, finished=0}
 function Init()
@@ -69,12 +88,12 @@ function Init()
   SetupNextAndBack(false, -1)
   SetupTitleText(UIText.IDS_PC_KEYBOARD_CONTROLS)
   local lines = {
-    UIText.IDS_PC_KEYS_MOVE, UIText.IDS_PC_KEYS_START,
+    UIText.IDS_PC_KEYS_MOVE, UIText.IDS_PC_KEYS_START, UIText.IDS_PC_KEYS_BONUS,
     UIText.IDS_PC_KEYS_PAUSE, UIText.IDS_PC_KEYS_A,
     UIText.IDS_PC_KEYS_B, UIText.IDS_PC_KEYS_X, UIText.IDS_PC_KEYS_Y,
     UIText.IDS_PC_KEYS_MENU_ESC, UIText.IDS_PC_KEYS_PLAYER
   }
-  for i=1,9 do
+  for i=1,10 do
     Buttons.AddButton({
       type=UIEnums.ButtonTypes.TEXT, x=48, y=130+(i-1)*28,
       width=544, height=UIGlobals.font_size.small,
@@ -159,6 +178,15 @@ function Exit() end
 struct NativeHelpReader {
   std::string_view source;
   size_t position = 0;
+  void BeginFirstTimePlay(std::string_view name,
+                          std::span<const uint8_t> compressed) {
+    End();
+    // Never bypass an unknown script/revision. No retail script is copied into
+    // the public source; replacement is authored above and loaded at runtime.
+    if (name == "Main\\FirstTimePlay.lua" && compressed.size() == 2818 &&
+        ProfileScriptCrc(compressed) == 0x9D605829u)
+      source = first_time_play_source;
+  }
   // Both fingerprints are required before adding a route to the new page.
   // Return the real stock filename's guest address for the virtual keyboard
   // screen, so no external script or asset needs to exist on disk.

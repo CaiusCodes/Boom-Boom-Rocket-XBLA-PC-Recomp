@@ -1,5 +1,6 @@
 #include "src/profile_welcome.h"
 #include "src/native_help.h"
+#include "src/rocket_labels.h"
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -17,7 +18,7 @@ int main(int argc, char** argv) {
     Check(bbr::ProfileScriptCrc({reinterpret_cast<const uint8_t*>(crc_fixture.data()), crc_fixture.size()}) == 0xCBF43926,
           "standard CRC32 fixture");
     bbr::NativeHelpReader public_help;
-    for(auto source : {bbr::help_menu_source,bbr::keyboard_help_source,bbr::timing_help_source}) {
+    for(auto source : {bbr::help_menu_source,bbr::keyboard_help_source,bbr::timing_help_source,bbr::first_time_play_source}) {
       public_help.source=source; public_help.position=0;
       std::string loaded; std::array<uint8_t,512> buffer{}; uint32_t size=0;
       while(public_help.Read(buffer,size) && size)
@@ -28,6 +29,20 @@ int main(int argc, char** argv) {
     std::array<uint8_t,512> help_buffer{}; uint32_t help_size=456;
     Check(!public_help.Read(help_buffer,help_size) && help_size==456,
           "original reader retained after end of help load");
+    std::vector<uint8_t> unknown_chooser(2818);
+    public_help.BeginFirstTimePlay("Main\\FirstTimePlay.lua",unknown_chooser);
+    Check(public_help.source.empty(),"unknown first-play script retains original flow");
+    Check(bbr::first_time_play_source.find("SetInitialHelpScreen(false)") != std::string_view::npos &&
+          bbr::first_time_play_source.find("Main\\\\SpChooseGameType.lua") != std::string_view::npos &&
+          bbr::first_time_play_source.find("StoreOptionsTable") == std::string_view::npos &&
+          bbr::first_time_play_source.find("Buttons.") == std::string_view::npos,
+          "first-play bypass clears flag and routes forward without choosing or saving labels");
+    Check(bbr::ResolveRocketLabels(-1,false)==1 && bbr::ResolveRocketLabels(-1,true)==2,
+          "automatic rocket labels remain arrows for keyboard and ABXY for gamepad");
+    for (int32_t preference : {0,1,2})
+      Check(bbr::ResolveRocketLabels(preference,false)==preference &&
+            bbr::ResolveRocketLabels(preference,true)==preference,
+            "saved rocket-label choice overrides either input device");
     bbr::ProfileWelcomeReader reader;
     std::vector<uint8_t> invalid(2000);
     reader.Begin("Profile\\Load.lua", invalid);
@@ -52,6 +67,16 @@ int main(int argc, char** argv) {
       std::ifstream in(argv[1], std::ios::binary);
       std::vector<uint8_t> image((std::istreambuf_iterator<char>(in)), {});
       Check(image.size() >= 0x307007 + 2000, "private guest image loaded");
+      auto chooser_stream=std::span<const uint8_t>(image).subspan(0x2FE935,2818);
+      public_help.BeginFirstTimePlay("Main\\FirstTimePlay.lua",chooser_stream);
+      Check(public_help.source==bbr::first_time_play_source,
+            "supported original first-play stream selects authored bypass");
+      public_help.BeginFirstTimePlay("Main\\SpChooseGameType.lua",chooser_stream);
+      Check(public_help.source.empty(),"other single-player screens are not replaced");
+      image[0x2FE935+1400]^=1;
+      public_help.BeginFirstTimePlay("Main\\FirstTimePlay.lua",chooser_stream);
+      Check(public_help.source.empty(),"changed first-play stream disables bypass");
+      image[0x2FE935+1400]^=1;
       bbr::NativeHelpReader help;
       auto main_stream=std::span<const uint8_t>(image).subspan(0x305099,1115);
       auto controls_stream=std::span<const uint8_t>(image).subspan(0x3042A2,1479);

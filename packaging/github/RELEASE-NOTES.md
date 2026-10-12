@@ -1,10 +1,24 @@
 # Boom Boom Rocket XBLA PC Recomp v0.9.1
 
+## Updated v0.9.1 build (12 October 2026)
+
+- Space activates Bonus Run (right trigger) during gameplay; it remains Start
+  in menus. Enter and gameplay Escape retain their Start/pause mappings.
+- WASD and arrow keys send D-pad state and keystrokes in menus and gameplay.
+- Keyboard help documents Bonus Run, including upgrades of existing help text.
+- Skip the first-play rocket-label chooser, retaining automatic keyboard/pad
+  labels and any choice saved in Settings.
+- Preserve keyboard keystrokes when a connected physical controller is idle.
+- Updated documentation screenshots and original-project social preview.
+
+The v0.9.1 downloads and tag have been refreshed for this build. Existing saves
+and settings are preserved when running setup in an existing portable folder.
+
 ## Publication preparation
 
 - All four generated-code hook locations now apply through deterministic,
   hash-verified patches; clean regeneration reproduces the working source.
-- Pinned upstream ReXGlue with 20 focused file patches replaces reliance on the
+- Pinned upstream ReXGlue with 21 focused file patches replaces reliance on the
   shared modified SDK. Unrelated SDK changes and debug traces are excluded.
 - Original project integration/tooling is MIT licensed. Third-party notices and
   matching LGPL dependency sources accompany the portable tool.
@@ -63,7 +77,8 @@
 
 - Version numbering reset to `v0.9.1`; smoother title-screen version text at the same size.
 - Player-one keyboard/mouse support, alongside controllers: WASD directions,
-  Enter/Space Start, E/left-click A, B/Backspace/right-click B, X and Y.
+  Enter Start, Space Bonus Run during play/Start in menus, E/left-click A,
+  B/Backspace/right-click B, X and Y.
 - Focus loss and overlay capture release input; overlapping aliases work correctly.
 - Skip the new-profile welcome acknowledgement while preserving creation and saving.
 - Earlier baseline marked Multiplayer "coming soon"; this test build supersedes that text.

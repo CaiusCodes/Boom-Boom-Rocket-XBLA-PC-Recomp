@@ -84,7 +84,7 @@ if (Test-Path -LiteralPath $appPath) {
 } else {
  $labels=(Get-Content -LiteralPath (Join-Path $setupSource 'PcStrings.txt') -Raw).TrimEnd("`r","`n").Replace("`r`n","`n").Replace("`n","`r`n")
 }
-if (-not $labels.StartsWith('IDS_PC_DISPLAY_MODE =') -or $labels.TrimEnd("`r","`n").Split("`n").Count -ne 79) { throw 'PC string extraction failed.' }
+if (-not $labels.StartsWith('IDS_PC_DISPLAY_MODE =') -or $labels.TrimEnd("`r","`n").Split("`n").Count -ne 80) { throw 'PC string extraction failed.' }
 $labelsFile=Join-Path $work 'pc-strings.txt'
 [IO.File]::WriteAllText($labelsFile,$labels,[Text.UTF8Encoding]::new($false))
 

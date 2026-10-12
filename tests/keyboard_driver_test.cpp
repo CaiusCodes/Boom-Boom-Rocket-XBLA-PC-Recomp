@@ -165,6 +165,28 @@ int main() {
   state.Clear(); state.Set('W', true); state.Set(0x26, true); state.Poll(); state.Set('W', false);
   Check(state.Poll() == 1, "arrow alias remains held after W releases");
   state.Set(0x26, false); Check(state.Poll() == 0, "final direction alias releases");
+  state.Clear(); state.Set(0x20,true,true);
+  Check(state.Poll()==0 && state.PollRightTrigger()==255,
+        "gameplay Space presses right trigger, never Start");
+  state.Set(0x20,true,false);
+  Check(state.Poll()==0 && state.PollRightTrigger()==255,
+        "held Bonus Run Space retains trigger after pause opens");
+  state.Set(0x20,false,false);
+  Check(state.Poll()==0 && state.PollRightTrigger()==0,
+        "Bonus Run releases original trigger across screen transition");
+  state.Set(0x20,true,false);
+  Check(state.Poll()==0x10 && state.PollRightTrigger()==0,
+        "Space remains Start in menus");
+  state.Set(0x20,true,true);
+  Check(state.Poll()==0x10 && state.PollRightTrigger()==0,
+        "held menu Space never activates Bonus Run after gameplay starts");
+  state.Set(0x20,false,true);
+  Check(state.Poll()==0 && state.PollRightTrigger()==0,"menu Space releases Start");
+  state.Set(0x20,true,true);state.Set(0x20,false,true);
+  Check(state.Poll()==0 && state.PollRightTrigger()==255 && state.PollRightTrigger()==0,
+        "short Space tap survives exactly one trigger poll");
+  state.Set(0x20,true,true);state.Clear();
+  Check(state.Poll()==0 && state.PollRightTrigger()==0,"clear drops held and pending trigger");
 
   BbrKeyboardDriver driver; rex::ui::UISetupEvent focus;
   bool allowed = true;
@@ -190,18 +212,46 @@ int main() {
   Check(Poll(driver) == 0x2000 && driver.GetKeystroke(0, 0, &stroke) == 0 && stroke.virtual_key == 0x5801,
         "driver emits Xbox Back for menu Esc");
   driver.OnKeyUp(escape); Poll(driver); driver.GetKeystroke(0, 0, &stroke);
-  for (auto bind : bbr::keyboard_bindings) {
-    if (bind.key < 0x25 || bind.key > 0x28) continue;
+  for (bool gameplay : {false,true}) for (auto bind : bbr::keyboard_bindings) {
+    if ((bind.key < 0x25 || bind.key > 0x28) &&
+        bind.key!='W' && bind.key!='S' && bind.key!='A' && bind.key!='D') continue;
+    bbr::gameplay_screen_active.store(gameplay);
     auto arrow = Key(bind.key);
     driver.OnKeyDown(arrow);
     Check(Poll(driver) == bind.button && driver.GetKeystroke(0, 0, &stroke) == 0 &&
           stroke.virtual_key == bind.pad_key && stroke.flags == 1,
-          "driver emits direction state and Xbox keystroke for arrow key");
+          "WASD/arrow keys emit D-pad state and keystroke in menus and gameplay");
     driver.OnKeyUp(arrow);
     Check(Poll(driver) == 0 && driver.GetKeystroke(0, 0, &stroke) == 0 &&
           stroke.virtual_key == bind.pad_key && stroke.flags == 2,
-          "driver releases arrow state and Xbox keystroke");
+          "WASD/arrow keys release D-pad state and keystroke");
   }
+  auto space = Key(0x20);
+  rex::input::X_INPUT_STATE bonus_state{};
+  driver.OnKeyDown(space);driver.GetState(0,&bonus_state);
+  Check(bonus_state.gamepad.right_trigger==255 && bonus_state.gamepad.left_trigger==0 &&
+        bonus_state.gamepad.buttons==0 && driver.GetKeystroke(0,0,&stroke)==0 &&
+        stroke.virtual_key==0x5807 && stroke.flags==1,
+        "driver emits right-trigger state/keystroke for gameplay Space, not Start");
+  const auto bonus_packet=bonus_state.packet_number;
+  bbr::gameplay_screen_active.store(false);driver.OnKeyUp(space);driver.GetState(0,&bonus_state);
+  Check(bonus_state.gamepad.right_trigger==0 && bonus_state.gamepad.buttons==0 &&
+        bonus_state.packet_number!=bonus_packet && driver.GetKeystroke(0,0,&stroke)==0 &&
+        stroke.virtual_key==0x5807 && stroke.flags==2,
+        "trigger release updates packet and keystroke after pause transition");
+  driver.OnKeyDown(space);driver.GetState(0,&bonus_state);
+  Check(bonus_state.gamepad.buttons==0x10 && bonus_state.gamepad.right_trigger==0 &&
+        driver.GetKeystroke(0,0,&stroke)==0 && stroke.virtual_key==0x5814,
+        "menu Space still emits Start without a trigger");
+  driver.OnKeyUp(space);Poll(driver);driver.GetKeystroke(0,0,&stroke);
+  bbr::gameplay_screen_active.store(true);driver.OnKeyDown(space);driver.GetState(0,&bonus_state);
+  driver.OnLostFocus(focus);driver.GetState(0,&bonus_state);
+  Check(bonus_state.gamepad.buttons==0 && bonus_state.gamepad.right_trigger==0,
+        "focus loss releases Bonus Run trigger");
+  driver.OnGotFocus(focus);driver.OnKeyDown(space);allowed=false;driver.GetState(0,&bonus_state);
+  Check(bonus_state.gamepad.buttons==0 && bonus_state.gamepad.right_trigger==0,
+        "overlay capture releases Bonus Run trigger");
+  allowed=true;bbr::gameplay_screen_active.store(false);
   for(uint16_t key : {uint16_t('Q'),uint16_t('E'),uint16_t('W'),uint16_t(0x1B),
                      uint16_t(0x26),uint16_t(0xBA),uint16_t(0x70),uint16_t(0x20)}) {
     bbr::title_screen_active.store(true);
@@ -249,6 +299,15 @@ int main() {
   Check(merged.gamepad.buttons == 0x9000, "installed runtime merges controller and keyboard");
   Check(system.GetKeystroke(0, 0, &stroke) == 0 && stroke.virtual_key == 0x5800,
         "idle controller does not swallow keyboard keystrokes");
+  rex::input::InputSystem bonus_system(nullptr);
+  bonus_system.AddDriver(std::make_unique<PhysicalPad>());
+  auto bonus_keyboard=std::make_unique<BbrKeyboardDriver>();
+  bonus_keyboard->OnGotFocus(focus);bbr::gameplay_screen_active.store(true);
+  bonus_keyboard->OnKeyDown(space);bonus_system.AddDriver(std::move(bonus_keyboard));
+  bonus_system.GetState(0,&merged);
+  Check(merged.gamepad.buttons==0x8000 && merged.gamepad.right_trigger==255,
+        "runtime merges keyboard Bonus Run trigger with physical controller buttons");
+  bbr::gameplay_screen_active.store(false);
   rex::input::InputSystem two_players(nullptr);
   auto first = std::make_unique<BbrKeyboardDriver>();
   auto second = std::make_unique<BbrKeyboardDriver>(1, true);

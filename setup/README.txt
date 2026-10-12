@@ -79,7 +79,9 @@ CONTROLS
 Help & Options now has separate Gamepad Controls and Keyboard Controls pages.
 Xbox-compatible controllers remain supported. Keyboard and mouse control player 1:
 W/S/A/D or arrow keys   Up / Down / Left / Right
-Enter or Space          Start (including pause)
+Enter                   Start (including pause)
+Space while playing    Bonus Run (right trigger)
+Space in menus         Start
 Esc while playing      Start (pause)
 Esc in menus           B (back; resumes from the pause menu)
 E or left mouse button  A (confirm)

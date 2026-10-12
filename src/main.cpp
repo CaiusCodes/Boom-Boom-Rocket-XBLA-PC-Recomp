@@ -61,6 +61,10 @@ uint32_t BBR_BeginUiScript(const char* name, uint8_t* base) {
   bbr::native_help_reader.End();
   BBR_ClearCustomMenuState(name);
   if (!name) return 0;
+  if (std::string_view(name) == "Main\\FirstTimePlay.lua") {
+    bbr::native_help_reader.BeginFirstTimePlay(name, {base+0x822FE935u,2818});
+    return 0;
+  }
   if (std::string_view(name) == "Options\\Main.lua" ||
       std::string_view(name) == "Options\\Keyboard.lua" ||
       std::string_view(name) == "Options\\Calibration.lua") {

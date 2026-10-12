@@ -218,6 +218,20 @@
       ]
     },
     {
+      "file": "src/input/input_system.cpp",
+      "rawSha256": "DFFB554325EE5A5E832D41E54C54A4B75740A8C199DFDD6A80598EBB43B596EE",
+      "patchedSha256": "74AC3755B7BBC0AD1494666BDD5B55ECC52E24094C09F8CEDE4DB41FEF564E19",
+      "edits": [
+        {
+          "index": 154,
+          "remove": 1,
+          "insert": [
+            "    if (result == X_ERROR_SUCCESS) {"
+          ]
+        }
+      ]
+    },
+    {
       "file": "src/graphics/command_processor.cpp",
       "rawSha256": "08EB7127374D639D05476E9CDA9751D70E93C295BE9F2169EEE53A56B00D1B55",
       "patchedSha256": "060B68A6A2501783B3268E01728E7282562E6B5149E7A3B1DAB80B20AFF39FB3",

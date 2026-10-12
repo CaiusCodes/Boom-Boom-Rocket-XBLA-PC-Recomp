@@ -845,8 +845,8 @@ class BoomBoomRocketApp : public rex::ReXApp {
         L"IDS_PC_FRAME_165 = 165 FPS\r\n"
         L"IDS_PC_FRAME_240 = 240 FPS\r\n"
         L"IDS_PC_KEYBOARD_CONTROLS = Keyboard Controls\r\n"
-        L"IDS_PC_KEYS_MOVE = Move: W A S D or Arrow keys\r\n"
-        L"IDS_PC_KEYS_START = Start: Enter or Space\r\n"
+        L"IDS_PC_KEYS_MOVE = D-pad: W A S D or Arrow keys\r\n"
+        L"IDS_PC_KEYS_START = Start: Enter (Space in menus)\r\n"
         L"IDS_PC_KEYS_PAUSE = Pause / Resume: Esc during gameplay\r\n"
         L"IDS_PC_KEYS_A = A: E or Left mouse button\r\n"
         L"IDS_PC_KEYS_B = B: B, Backspace or Right mouse button\r\n"
@@ -906,7 +906,8 @@ class BoomBoomRocketApp : public rex::ReXApp {
         L"IDS_PC_PLAYER_ONE_NAME = Player 1 Name\r\n"
         L"IDS_PC_PLAYER_TWO_NAME = Player 2 Name\r\n"
         L"IDS_PC_PRESS_A = Press A\r\n"
-        L"IDS_PC_PRESS_ANY_KEY = Press Any Key";
+        L"IDS_PC_PRESS_ANY_KEY = Press Any Key\r\n"
+        L"IDS_PC_KEYS_BONUS = Bonus Run: Space during gameplay";
 
     for (const wchar_t* language_file : language_files) {
       const auto ini_path =
@@ -962,6 +963,17 @@ class BoomBoomRocketApp : public rex::ReXApp {
           if (!text.empty() && text.back()!=L'\n') text+=L"\r\n";
           text += line+L"\r\n";
           changed = true;
+        } else if (line.starts_with(L"IDS_PC_KEYS_MOVE =") ||
+                   line.starts_with(L"IDS_PC_KEYS_START =")) {
+          // Existing installations need revised keyboard help too. Replace
+          // only the value in place, preserving every numeric string-table ID.
+          const auto label_start = text.find(line.substr(0,separator)+L" =");
+          const auto label_end = text.find_first_of(L"\r\n",label_start);
+          const auto length = (label_end == std::wstring::npos ? text.size() : label_end)-label_start;
+          if (text.compare(label_start,length,line)!=0) {
+            text.replace(label_start,length,line);
+            changed = true;
+          }
         }
         if (end == std::wstring::npos) break;
         start = end+2;
